@@ -120,12 +120,10 @@ cd ruvon-sdk
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-# Install development dependencies
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
-
-# Install Ruvon in editable mode
-pip install -e .
+# Install in editable mode with all extras
+pip install -e ".[postgres,performance,cli]"
+pip install -e "packages/ruvon-edge[edge]"
+pip install -e "packages/ruvon-server[server,celery,auth]"
 
 # Verify installation
 ruvon --version
