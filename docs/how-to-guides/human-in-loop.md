@@ -415,7 +415,7 @@ Old pattern (still supported):
 - [Implement saga mode](saga-mode.md)
 - [Deploy to production](deployment.md)
 
-## Edge Device HITL Round-Trip (v1.0.0rc5)
+## Edge Device HITL Round-Trip
 
 For air-gapped or offline-capable edge devices, Ruvon supports a full cloud HITL round-trip: the device escalates a decision to the cloud, an analyst reviews it in the dashboard, and the decision is delivered back to the device as a command.
 

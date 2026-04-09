@@ -8,7 +8,7 @@ This guide covers deploying the Ruvon Dashboard, logging in, assigning roles, an
 
 - Docker Compose with the Ruvon stack running (`ruvon-server`, `ruvon-worker`, `postgres`, `redis`)
 - A Keycloak instance **or** any OIDC-compatible identity provider
-- The `ruvon-dashboard` Docker image (`ruhfuskdev/ruvon-dashboard:1.0.0rc5`)
+- The `ruvon-dashboard` Docker image (`ruvondev/ruvon-dashboard:0.1.1`)
 
 ---
 
@@ -18,7 +18,7 @@ Add the `ruvon-dashboard` service to your compose file:
 
 ```yaml
 ruvon-dashboard:
-  image: ruhfuskdev/ruvon-dashboard:1.0.0rc5
+  image: ruvondev/ruvon-dashboard:0.1.1
   ports: ["3000:3000"]
   environment:
     NEXT_PUBLIC_RUVON_API_URL: http://localhost:8000   # baked at build time
@@ -115,7 +115,7 @@ For each pending approval:
 
 Approved workflows resume immediately; rejected workflows transition to `FAILED`.
 
-#### Domain-Specific Review Panels (v1.0.0rc5)
+#### Domain-Specific Review Panels
 
 The Approvals page renders specialised panels based on `workflow_type`, replacing the generic JSON textarea for known workflow types:
 

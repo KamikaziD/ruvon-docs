@@ -31,10 +31,10 @@ python -c "from ruvon.builder import WorkflowBuilder; print('✅ Ruvon installed
 pip install aiosqlite orjson asyncpg uvloop
 ```
 
-Or install from requirements:
+Or install all extras:
 
 ```bash
-pip install -r requirements.txt
+pip install 'ruvon-sdk[postgres,performance,cli]'
 ```
 
 ### Module not found: "examples.quickstart.steps"
@@ -491,13 +491,13 @@ message_template: "Hello {{ recipient }}, your amount is {{ amount }}"
 **Solution:** (1) Update the version pin in all three Dockerfiles as part of the version bump step. (2) Always build with `--no-cache` after a version bump:
 
 ```bash
-docker build --no-cache -f docker/Dockerfile.ruvon-server-prod -t ruhfuskdev/ruvon-server:0.6.x .
+docker build --no-cache -f docker/Dockerfile.ruvon-server-prod -t ruvondev/ruvon-server:0.1.1 .
 ```
 
 **Verify:**
 
 ```bash
-docker run --rm ruhfuskdev/ruvon-server:0.6.x python -c "import ruvon; print(ruvon.__version__)"
+docker run --rm ruvondev/ruvon-server:0.1.1 python -c "import ruvon; print(ruvon.__version__)"
 # Must print the new version
 ```
 
@@ -530,8 +530,8 @@ docker logs ruvon-server
 3. Missing dependencies:
 
    ```dockerfile
-   # Ensure all dependencies in requirements.txt
-   RUN pip install -r requirements.txt
+   # Install the Ruvon packages you need
+   RUN pip install 'ruvon-sdk[postgres,performance]'
    ```
 
 ### Kubernetes pod crash loop
@@ -646,7 +646,7 @@ python -c "import ruvon; print(ruvon.__version__)"
 psql --version  # or sqlite3 --version
 
 # Environment variables
-env | grep -E "(DATABASE|CELERY|RUFUS)"
+env | grep -E "(DATABASE|CELERY|RUVON)"
 
 # Workflow status
 ruvon show <workflow-id> --state --logs

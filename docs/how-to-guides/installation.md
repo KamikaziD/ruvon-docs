@@ -2,7 +2,7 @@
 
 This guide covers installing Ruvon for different scenarios.
 
-## Package structure (v0.6.0+)
+## Package structure
 
 Ruvon ships as three separate wheels so each deployment target only installs what it needs:
 
@@ -16,7 +16,7 @@ Ruvon ships as three separate wheels so each deployment target only installs wha
 
 ## Prerequisites
 
-- Python 3.9 or higher
+- Python 3.10 or higher
 - pip package manager
 - (Optional) Docker for containerized setup
 
@@ -66,9 +66,6 @@ cd ruvon-sdk
 pip install -e ".[postgres,performance,cli]"
 pip install -e "packages/ruvon-edge[edge]"
 pip install -e "packages/ruvon-server[server,celery,auth]"
-
-# Install core dependencies
-pip install aiosqlite orjson uvloop
 ```
 
 Verify installation:
@@ -105,7 +102,7 @@ docker compose up postgres -d
 Install SDK:
 
 ```bash
-pip install -r requirements.txt
+pip install 'ruvon-sdk[postgres,performance]'
 ```
 
 Initialize database with Alembic migrations:
@@ -202,7 +199,7 @@ Expected output:
 
 ```
 ======================================================================
-  RUFUS SDK - SQLITE SIMPLE DEMO
+  RUVON SDK - SQLITE SIMPLE DEMO
 ======================================================================
 
 🗄️  Using in-memory SQLite database
@@ -263,7 +260,7 @@ pip install aiosqlite orjson asyncpg uvloop
 
 ## Package footprint
 
-As of v0.6.0 each wheel only ships the code you actually need:
+Each wheel only ships the code you actually need:
 
 | Wheel | On-disk size | Contents |
 |-------|:-----------:|---------|
