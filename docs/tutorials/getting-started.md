@@ -13,14 +13,14 @@ In this tutorial, you'll:
 
 ## Prerequisites
 
-- Python 3.9 or higher
+- Python 3.10 or higher
 - Basic Python knowledge
 - 5 minutes of your time
 
 ## Step 1: Install Ruvon
 
 ```bash
-pip install -r requirements.txt
+pip install ruvon-sdk
 ```
 
 That's it! Ruvon includes SQLite support by default, so no database setup is needed for this tutorial.

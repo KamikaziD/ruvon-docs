@@ -50,7 +50,7 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 Install Ruvon SDK:
 
 ```bash
-pip install ruvon
+pip install ruvon-sdk
 ```
 
 Create the project structure:
@@ -397,7 +397,7 @@ async def initialize_database(db_path: str):
 
 async def main():
     print("="*70)
-    print("  RUFUS TASK MANAGER")
+    print("  RUVON TASK MANAGER")
     print("="*70)
 
     # Initialize persistence
@@ -516,7 +516,7 @@ You should see output like:
 
 ```
 ======================================================================
-  RUFUS TASK MANAGER
+  RUVON TASK MANAGER
 ======================================================================
 
 🗄️  Initializing SQLite database...

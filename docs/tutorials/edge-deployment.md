@@ -561,7 +561,7 @@ async def process_payment(builder: WorkflowBuilder, persistence, sync_manager: S
 
 async def main():
     print("="*70)
-    print("  RUFUS EDGE AGENT - PAYMENT TERMINAL")
+    print("  RUVON EDGE AGENT - PAYMENT TERMINAL")
     print("="*70)
 
     # Initialize edge persistence
@@ -683,7 +683,7 @@ Output:
 
 ```
 ======================================================================
-  RUFUS EDGE AGENT - PAYMENT TERMINAL
+  RUVON EDGE AGENT - PAYMENT TERMINAL
 ======================================================================
 
 💾 Initializing edge database...

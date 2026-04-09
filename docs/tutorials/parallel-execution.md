@@ -368,7 +368,7 @@ from ruvon.implementations.templating.jinja2 import Jinja2TemplateEngine
 
 async def main():
     print("="*70)
-    print("  RUFUS PARALLEL EXECUTION DEMO")
+    print("  RUVON PARALLEL EXECUTION DEMO")
     print("="*70)
 
     # Create workflow builder with thread pool executor
@@ -454,7 +454,7 @@ Output:
 
 ```
 ======================================================================
-  RUFUS PARALLEL EXECUTION DEMO
+  RUVON PARALLEL EXECUTION DEMO
 ======================================================================
 
 ⚙️  Initializing with ThreadPoolExecutor (parallel execution)...

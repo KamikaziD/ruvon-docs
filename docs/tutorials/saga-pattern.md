@@ -374,7 +374,7 @@ from ruvon.implementations.templating.jinja2 import Jinja2TemplateEngine
 
 async def main():
     print("="*70)
-    print("  RUFUS SAGA PATTERN DEMO")
+    print("  RUVON SAGA PATTERN DEMO")
     print("="*70)
 
     # Create workflow builder
@@ -480,7 +480,7 @@ Output (success):
 
 ```
 ======================================================================
-  RUFUS SAGA PATTERN DEMO
+  RUVON SAGA PATTERN DEMO
 ======================================================================
 
 ======================================================================
@@ -556,7 +556,7 @@ Output (with compensation):
 
 ```
 ======================================================================
-  RUFUS SAGA PATTERN DEMO
+  RUVON SAGA PATTERN DEMO
 ======================================================================
 
 ======================================================================
