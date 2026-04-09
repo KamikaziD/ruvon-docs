@@ -4,13 +4,13 @@ Complete reference for installed package size across all edge deployment scenari
 
 ---
 
-## What Ships in Each Wheel (v0.6.0+)
+## What Ships in Each Wheel
 
-As of v0.6.0, Ruvon ships as **three separate wheels**. Edge devices install only `ruvon-edge`,
+Ruvon ships as **three separate wheels**. Edge devices install only `ruvon-edge`,
 which pulls in `ruvon-sdk` (core) but never installs the 10 MB cloud control plane.
 
 ```
-ruvon_sdk-0.6.0-py3-none-any.whl  (~2.5 MB)
+ruvon_sdk-0.1.1-py3-none-any.whl  (~2.5 MB)
 │
 ├── ruvon/                          1.9 MB  57 files  — Core SDK + all implementations
 │   ├── workflow.py                 (970 lines) — Workflow orchestrator
@@ -142,7 +142,7 @@ pip install ruvon-edge
 
 **Capabilities:** STANDARD/DECISION/LOOP/HITL steps, SAF queue, SQLite persistence, ETag config polling.
 
-**Minimum device:** 128 MB RAM, 64 MB free storage, Python 3.9+.
+**Minimum device:** 128 MB RAM, 64 MB free storage, Python 3.10+.
 
 ---
 
@@ -287,7 +287,7 @@ ruvon.implementations.inference.*       ← Only if AI inference enabled
 
 ## Reducing Footprint
 
-As of v0.6.0, `pip install ruvon-edge` installs only the core engine and edge agent —
+`pip install ruvon-edge` installs only the core engine and edge agent —
 the CLI and cloud control plane are in separate wheels and are not installed.
 
 **For severely flash-constrained hardware (<64 MB storage):**
