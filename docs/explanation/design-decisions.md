@@ -7,7 +7,7 @@ Ruvon makes specific architectural choices that shape how you use it. Understand
 **Decision**: Abstract external dependencies behind provider interfaces.
 
 **Alternatives Considered**:
-- **Monolithic**: Hardcode PostgreSQL, Celery, etc. (like Confucius)
+- **Monolithic**: Hardcode PostgreSQL, Celery, etc. directly in the engine
 - **Microservices**: Separate services for persistence, execution, etc.
 - **Plugin System**: Dynamic plugin loading at runtime
 
@@ -21,7 +21,7 @@ Ruvon makes specific architectural choices that shape how you use it. Understand
 
 **Example Impact**:
 ```python
-# Without providers (Confucius)
+# Without providers (hardcoded)
 # ALWAYS requires Redis + Celery for testing
 def test_workflow():
     # Start Redis container...
@@ -410,18 +410,18 @@ steps:
 | **CLI + Server** | DX, ops workflows | More components |
 | **Hybrid Dependencies** | Simplicity + power | Two ordering models |
 
-## Lessons from Confucius
+## Design Principles in Practice
 
-Ruvon learned from Confucius's shortcomings:
+Each principle above addresses a real production failure mode:
 
-1. **Hardcoded Dependencies** → Provider pattern
-2. **No Testability** → In-memory providers
-3. **Breaking Changes** → Workflow snapshots
-4. **No Zombie Detection** → Heartbeat system
-5. **Manual Scaling** → Kubernetes + auto-scaling
-6. **No CLI** → Ruvon CLI tool
+1. **Hardcoded Dependencies** → Provider pattern removes this risk
+2. **No Testability** → In-memory providers enable fast tests
+3. **Breaking Changes** → Workflow snapshots isolate running workflows
+4. **No Zombie Detection** → Heartbeat system recovers from crashes
+5. **Manual Scaling** → Kubernetes + auto-scaling handles traffic spikes
+6. **No CLI** → Ruvon CLI enables ops automation
 
-These lessons shaped Ruvon's production-first philosophy.
+These trade-offs shaped Ruvon's production-first philosophy.
 
 ## What's Next
 

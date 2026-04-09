@@ -4,28 +4,12 @@ Ruvon SDK is built on the provider pattern—a dependency injection approach tha
 
 ## Why Providers?
 
-Before Ruvon, Confucius hardcoded dependencies:
+Hardcoding dependencies leads to several problems:
 
-```python
-# Confucius: Hardcoded Redis and Celery
-class Workflow:
-    def __init__(self, ...):
-        # HARDCODED: Always uses Redis
-        self.persistence = redis.from_url(
-            os.getenv("REDIS_URL", "redis://localhost:6379/0")
-        )
-
-        # HARDCODED: Always uses Celery
-        from .tasks import execute_async_task
-        self.async_executor = execute_async_task
-```
-
-This created several problems:
-
-1. **Testing was hard**: Every test required Redis and Celery infrastructure
-2. **No flexibility**: Couldn't use PostgreSQL or SQLite without rewriting code
+1. **Testing is hard**: Every test requires Redis and Celery infrastructure
+2. **No flexibility**: Can't use PostgreSQL or SQLite without rewriting code
 3. **Edge deployment impossible**: Can't run Celery on a POS terminal
-4. **Tight coupling**: Changing storage backend meant changing workflow engine code
+4. **Tight coupling**: Changing storage backend means changing workflow engine code
 
 The provider pattern solves all of these by **abstracting external dependencies behind interfaces**.
 
@@ -77,7 +61,7 @@ class PersistenceProvider(Protocol):
 - **PostgresPersistenceProvider**: Production storage with ACID guarantees
 - **SQLitePersistenceProvider**: Embedded storage for edge devices and development
 - **MemoryPersistenceProvider**: In-memory storage for testing
-- **RedisPersistenceProvider**: Redis-backed storage (legacy from Confucius)
+- **RedisPersistenceProvider**: Redis-backed storage
 
 **Why Multiple Implementations?**
 - **PostgreSQL**: Cloud deployments need ACID transactions, connection pooling, and scalability

@@ -425,7 +425,7 @@ def validate_config(config, expected_checksum):
 
 ## Package Footprint
 
-As of v0.6.0, Ruvon ships as three separate wheels. Edge devices install only `ruvon-edge`,
+Ruvon ships as three separate wheels. Edge devices install only `ruvon-edge`,
 which pulls in the `ruvon-sdk` core but never installs the 10 MB cloud control plane.
 
 | Scenario | Install command | Disk | RAM |

@@ -79,7 +79,7 @@ The SDK sits at the center, with three optional components built on top:
 
 ## Core Layers
 
-Ruvon uses a four-layer architecture, inherited from Confucius and enhanced with provider abstractions:
+Ruvon uses a four-layer architecture with provider abstractions:
 
 ### 1. API Layer
 
@@ -230,7 +230,7 @@ All workflow state is JSON-serializable via Pydantic models. Internally, Ruvon u
 
 Many Ruvon operations are async (persistence, HTTP steps), but Celery tasks run in sync contexts. The solution:
 
-**PostgresExecutor** pattern (inherited from Confucius):
+**PostgresExecutor** pattern:
 ```python
 class _PostgresExecutor:
     def __init__(self):

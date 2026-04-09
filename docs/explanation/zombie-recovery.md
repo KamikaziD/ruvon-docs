@@ -34,7 +34,7 @@ Consider this scenario:
 
 ## How Zombie Detection Works
 
-Ruvon uses a heartbeat-based approach inherited from Confucius:
+Ruvon uses a heartbeat-based approach:
 
 ### 1. Heartbeat During Execution
 
