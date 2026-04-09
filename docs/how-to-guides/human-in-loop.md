@@ -379,12 +379,11 @@ async def test_rejection_workflow():
     assert workflow.state.approved == False
 ```
 
-## Legacy migration note
+## Legacy pattern
 
-Before v0.6.1, HITL required a 2-step pattern: a STANDARD step that raised
-`WorkflowPauseDirective`, plus a separate STANDARD step that received `user_input` on resume.
-This pattern still works (backward compatible) but the self-contained `HUMAN_IN_LOOP` type is
-simpler and preferred for all new workflows.
+An older HITL pattern uses a STANDARD step that raises `WorkflowPauseDirective`, plus a
+separate STANDARD step that receives `user_input` on resume. This still works but the
+`HUMAN_IN_LOOP` step type is simpler and preferred for all new workflows.
 
 Old pattern (still supported):
 ```yaml
