@@ -1,0 +1,650 @@
+# Advanced: Security Considerations
+
+Security best practices for production Ruvon deployments, with focus on PCI-DSS compliance for fintech applications.
+
+---
+
+## PCI-DSS Compliance
+
+### Requirements for Payment Card Processing
+
+**PCI-DSS Level**: Depends on transaction volume
+- **Level 1**: > 6M transactions/year (strictest requirements)
+- **Level 2-4**: Fewer transactions (lighter requirements)
+
+**Key Requirements:**
+1. **Never store sensitive authentication data** (CVV, PIN, magnetic stripe)
+2. **Encrypt cardholder data at rest and in transit**
+3. **Maintain audit logs** of all access to cardholder data
+4. **Implement access controls** (least privilege principle)
+5. **Regular security testing** and vulnerability scanning
+
+---
+
+## Data Encryption
+
+### Encrypt Sensitive Data in Workflow State
+
+```python
+from cryptography.fernet import Fernet
+from pydantic import BaseModel, validator
+import os
+
+
+class SecurePaymentState(BaseModel):
+    """State with encrypted card data"""
+
+    # Public fields
+    transaction_id: str
+    amount: float
+    merchant_id: str
+
+    # Encrypted fields (stored as bytes)
+    encrypted_card_number: bytes
+    encrypted_cvv: bytes
+
+    # Tokenized reference (safe to store)
+    card_token: str  # e.g., "tok_1234567890"
+    card_last_four: str  # Last 4 digits OK to store
+
+    @classmethod
+    def from_card_data(cls, card_number: str, cvv: str, encryption_key: bytes, **kwargs):
+        """Create state from plaintext card data"""
+        f = Fernet(encryption_key)
+
+        return cls(
+            encrypted_card_number=f.encrypt(card_number.encode()),
+            encrypted_cvv=f.encrypt(cvv.encode()),
+            card_last_four=card_number[-4:],
+            **kwargs
+        )
+
+    def decrypt_card_number(self, encryption_key: bytes) -> str:
+        """Decrypt card number (use sparingly!)"""
+        f = Fernet(encryption_key)
+        return f.decrypt(self.encrypted_card_number).decode()
+```
+
+**Usage:**
+
+```python
+# Encryption key from environment (never hardcode!)
+ENCRYPTION_KEY = os.getenv("RUVON_ENCRYPTION_KEY").encode()
+
+# Create workflow with encrypted data
+state = SecurePaymentState.from_card_data(
+    card_number="4111111111111111",
+    cvv="123",
+    encryption_key=ENCRYPTION_KEY,
+    transaction_id="TXN-001",
+    amount=99.99,
+    merchant_id="MERCHANT-123",
+    card_token="tok_abc123"
+)
+
+workflow = builder.create_workflow("Payment", initial_data=state.dict())
+```
+
+---
+
+### Key Management
+
+**❌ Never do this:**
+
+```python
+# WRONG: Hardcoded encryption key
+ENCRYPTION_KEY = b'hardcoded-key-123'
+```
+
+**✅ Use environment variables:**
+
+```python
+import os
+
+ENCRYPTION_KEY = os.getenv("RUVON_ENCRYPTION_KEY")
+if not ENCRYPTION_KEY:
+    raise ValueError("RUVON_ENCRYPTION_KEY environment variable not set")
+```
+
+**✅ Better: Use AWS KMS or HashiCorp Vault:**
+
+```python
+import boto3
+
+def get_encryption_key():
+    """Fetch encryption key from AWS KMS"""
+    kms_client = boto3.client('kms')
+
+    response = kms_client.decrypt(
+        CiphertextBlob=os.getenv("ENCRYPTED_KEY_BLOB"),
+        EncryptionContext={'Application': 'Ruvon'}
+    )
+
+    return response['Plaintext']
+```
+
+---
+
+## Input Validation
+
+### Validate All User Input
+
+```python
+from pydantic import BaseModel, validator, constr, confloat
+
+
+class PaymentInput(BaseModel):
+    """Validated payment input"""
+
+    # Constrained types
+    card_number: constr(min_length=13, max_length=19, regex=r'^\d+$')
+    amount: confloat(gt=0, lt=1000000)  # > 0, < 1M
+    currency: constr(regex=r'^[A-Z]{3}$')  # ISO 4217 currency code
+
+    @validator('card_number')
+    def validate_card_number(cls, v):
+        """Luhn algorithm validation"""
+        def luhn_checksum(card_num):
+            def digits_of(n):
+                return [int(d) for d in str(n)]
+            digits = digits_of(card_num)
+            odd_digits = digits[-1::-2]
+            even_digits = digits[-2::-2]
+            checksum = sum(odd_digits)
+            for d in even_digits:
+                checksum += sum(digits_of(d*2))
+            return checksum % 10
+
+        if luhn_checksum(v) != 0:
+            raise ValueError('Invalid card number (Luhn check failed)')
+        return v
+
+    @validator('currency')
+    def validate_currency(cls, v):
+        """Only allow specific currencies"""
+        allowed_currencies = {'USD', 'EUR', 'GBP', 'CAD'}
+        if v not in allowed_currencies:
+            raise ValueError(f'Currency must be one of {allowed_currencies}')
+        return v
+```
+
+**Use in workflow:**
+
+```python
+def process_payment(state: PaymentState, context: StepContext, **user_input) -> dict:
+    """Process payment with validated input"""
+
+    # Validate input
+    try:
+        payment_input = PaymentInput(**user_input)
+    except ValidationError as e:
+        raise ValueError(f"Invalid payment input: {e}")
+
+    # Process payment
+    # ...
+```
+
+---
+
+## Access Control
+
+### API Key Management
+
+```python
+import secrets
+import hashlib
+from datetime import datetime, timedelta
+
+
+class APIKeyManager:
+    """Manage API keys for device authentication"""
+
+    def __init__(self, persistence_provider):
+        self.persistence = persistence_provider
+
+    def generate_api_key(self, device_id: str, expires_days: int = 365) -> str:
+        """Generate new API key for device"""
+        # Generate secure random key
+        api_key = secrets.token_urlsafe(32)
+
+        # Hash for storage (never store plaintext!)
+        key_hash = hashlib.sha256(api_key.encode()).hexdigest()
+
+        # Store hashed key
+        expiry = datetime.utcnow() + timedelta(days=expires_days)
+        await self.persistence.store_api_key(
+            device_id=device_id,
+            key_hash=key_hash,
+            expires_at=expiry
+        )
+
+        return api_key  # Return once, never store!
+
+    async def validate_api_key(self, device_id: str, api_key: str) -> bool:
+        """Validate API key"""
+        # Hash provided key
+        key_hash = hashlib.sha256(api_key.encode()).hexdigest()
+
+        # Check against stored hash
+        stored = await self.persistence.get_api_key(device_id)
+
+        if not stored:
+            return False
+
+        # Check expiry
+        if stored['expires_at'] < datetime.utcnow():
+            return False
+
+        # Compare hashes (timing-safe)
+        return secrets.compare_digest(stored['key_hash'], key_hash)
+```
+
+---
+
+### Role-Based Access Control (RBAC)
+
+```python
+from enum import Enum
+
+
+class Role(Enum):
+    """User roles"""
+    ADMIN = "admin"
+    OPERATOR = "operator"
+    VIEWER = "viewer"
+
+
+class Permission(Enum):
+    """Permissions"""
+    CREATE_WORKFLOW = "create_workflow"
+    VIEW_WORKFLOW = "view_workflow"
+    CANCEL_WORKFLOW = "cancel_workflow"
+    VIEW_LOGS = "view_logs"
+    MANAGE_DEVICES = "manage_devices"
+
+
+# Role-permission mapping
+ROLE_PERMISSIONS = {
+    Role.ADMIN: {
+        Permission.CREATE_WORKFLOW,
+        Permission.VIEW_WORKFLOW,
+        Permission.CANCEL_WORKFLOW,
+        Permission.VIEW_LOGS,
+        Permission.MANAGE_DEVICES,
+    },
+    Role.OPERATOR: {
+        Permission.CREATE_WORKFLOW,
+        Permission.VIEW_WORKFLOW,
+        Permission.CANCEL_WORKFLOW,
+        Permission.VIEW_LOGS,
+    },
+    Role.VIEWER: {
+        Permission.VIEW_WORKFLOW,
+        Permission.VIEW_LOGS,
+    }
+}
+
+
+def check_permission(user_role: Role, required_permission: Permission) -> bool:
+    """Check if user role has permission"""
+    return required_permission in ROLE_PERMISSIONS.get(user_role, set())
+
+
+# Decorator for permission checks
+def require_permission(permission: Permission):
+    def decorator(func):
+        async def wrapper(user, *args, **kwargs):
+            if not check_permission(user.role, permission):
+                raise PermissionError(f"User lacks permission: {permission.value}")
+            return await func(user, *args, **kwargs)
+        return wrapper
+    return decorator
+
+
+# Usage
+@require_permission(Permission.CANCEL_WORKFLOW)
+async def cancel_workflow(user, workflow_id: str):
+    """Cancel workflow (requires permission)"""
+    # ...
+```
+
+---
+
+## Audit Logging
+
+### Comprehensive Audit Trail
+
+```python
+async def audit_log(
+    persistence: PersistenceProvider,
+    event_type: str,
+    user_id: str,
+    workflow_id: Optional[str] = None,
+    details: Optional[Dict[str, Any]] = None
+):
+    """Log security-relevant event"""
+    await persistence.audit_log(
+        event_type=event_type,
+        user_id=user_id,
+        workflow_id=workflow_id,
+        timestamp=datetime.utcnow(),
+        ip_address=get_client_ip(),
+        details=details or {}
+    )
+
+
+# Log all security events
+await audit_log(
+    persistence=persistence,
+    event_type="WORKFLOW_CREATED",
+    user_id=user.id,
+    workflow_id=workflow.id,
+    details={"workflow_type": workflow.workflow_type}
+)
+
+await audit_log(
+    persistence=persistence,
+    event_type="API_KEY_GENERATED",
+    user_id=user.id,
+    details={"device_id": device_id}
+)
+
+await audit_log(
+    persistence=persistence,
+    event_type="UNAUTHORIZED_ACCESS_ATTEMPT",
+    user_id=user.id,
+    details={"attempted_workflow_id": workflow_id}
+)
+```
+
+---
+
+## Network Security
+
+### TLS/SSL for API Communication
+
+```python
+# Production: Always use HTTPS
+CLOUD_URL = "https://api.example.com"  # ✅
+
+# Development: HTTP OK for localhost only
+if os.getenv("ENVIRONMENT") == "development":
+    CLOUD_URL = "http://localhost:8000"  # OK for local dev
+```
+
+### Certificate Pinning (Edge Devices)
+
+```python
+import httpx
+
+
+def create_secure_client():
+    """Create HTTP client with certificate pinning"""
+    return httpx.AsyncClient(
+        verify="/path/to/ca-cert.pem",  # Custom CA certificate
+        timeout=30.0
+    )
+
+
+# Usage
+async with create_secure_client() as client:
+    response = await client.post(
+        f"{CLOUD_URL}/api/v1/sync",
+        json=data,
+        headers={"X-API-Key": API_KEY}
+    )
+```
+
+---
+
+## Secrets Management
+
+### Never Commit Secrets
+
+**❌ Bad: Secrets in code**
+
+```python
+API_KEY = "sk_live_abc123"  # NEVER DO THIS
+DB_PASSWORD = "password123"
+```
+
+**✅ Good: Environment variables**
+
+```bash
+# .env (add to .gitignore!)
+RUVON_API_KEY=sk_live_abc123
+DB_PASSWORD=password123
+ENCRYPTION_KEY=fernet-key-here
+```
+
+```python
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+API_KEY = os.getenv("RUVON_API_KEY")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+```
+
+---
+
+### Use Secrets Manager (Production)
+
+```python
+import boto3
+
+
+def get_secret(secret_name: str) -> str:
+    """Fetch secret from AWS Secrets Manager"""
+    client = boto3.client('secretsmanager')
+
+    response = client.get_secret_value(SecretId=secret_name)
+
+    return response['SecretString']
+
+
+# Usage
+DB_PASSWORD = get_secret("ruvon/db/password")
+API_KEY = get_secret("ruvon/api/key")
+```
+
+---
+
+## Security Checklist
+
+### Deployment Checklist
+
+- [ ] **Encryption**
+  - [ ] All sensitive data encrypted at rest
+  - [ ] TLS/SSL for all network communication
+  - [ ] Encryption keys in secure key management system
+
+- [ ] **Authentication**
+  - [ ] API keys hashed (never store plaintext)
+  - [ ] API key rotation implemented
+  - [ ] Rate limiting on authentication endpoints
+
+- [ ] **Authorization**
+  - [ ] Role-based access control (RBAC) implemented
+  - [ ] Least privilege principle enforced
+  - [ ] Permission checks on all sensitive operations
+
+- [ ] **Audit Logging**
+  - [ ] All security events logged
+  - [ ] Logs include user ID, timestamp, IP address
+  - [ ] Logs tamper-proof (write-only)
+
+- [ ] **Input Validation**
+  - [ ] All user input validated with Pydantic
+  - [ ] SQL injection prevention (parameterized queries)
+  - [ ] XSS prevention (if web UI)
+
+- [ ] **Secrets Management**
+  - [ ] No secrets in code or version control
+  - [ ] Secrets in environment variables or vault
+  - [ ] Secrets rotation policy
+
+- [ ] **Network Security**
+  - [ ] HTTPS only in production
+  - [ ] Certificate pinning for edge devices
+  - [ ] Firewall rules restricting access
+
+- [ ] **Compliance**
+  - [ ] PCI-DSS compliance (if processing payments)
+  - [ ] GDPR compliance (if processing EU user data)
+  - [ ] Regular security audits
+
+---
+
+## Vulnerability Scanning
+
+### Regular Security Scans
+
+```bash
+# Scan Python dependencies
+pip install safety
+safety check
+
+# Scan for secrets in code
+pip install detect-secrets
+detect-secrets scan
+
+# Static analysis
+pip install bandit
+bandit -r src/
+```
+
+---
+
+## Fintech & PCI-DSS Patterns
+
+This section covers security patterns specific to payment applications on Ruvon edge devices.
+
+### RUVON_ENCRYPTION_KEY Setup
+
+All workflow state is encrypted at rest using a Fernet key. **This key must be set before starting the server or any worker.**
+
+```bash
+# Generate key
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+
+# Set in environment (or .env file)
+export RUVON_ENCRYPTION_KEY="your-base64-fernet-key-here"
+```
+
+**Key rotation procedure:**
+
+1. Generate a new key
+2. Deploy the new key alongside the old key (dual-key mode)
+3. Run a migration job to re-encrypt existing workflow states
+4. Remove the old key from all environments
+5. Verify all workflows decrypt correctly before removing old key
+
+### Card Tokenization Pattern
+
+Never store PANs (Primary Account Numbers) in workflow state. Store a token reference instead.
+
+```python
+class PaymentState(BaseModel):
+    # OK: opaque token (safe to store)
+    card_token: str           # e.g., "tok_1a2b3c4d5e6f"
+
+    # OK: last 4 digits (safe to store under PCI-DSS)
+    card_last_four: str       # e.g., "4242"
+
+    # OK: card brand (safe to store)
+    card_brand: str           # e.g., "Visa"
+
+    # NEVER: raw PAN
+    # card_number: str        # NEVER store this
+
+def tokenize_card(state, context, card_number: str, **_):
+    """Call tokenization service immediately; never persist card_number."""
+    token = call_tokenization_service(card_number)
+    return {
+        "card_token": token,
+        "card_last_four": card_number[-4:],
+        "card_brand": detect_brand(card_number),
+    }
+```
+
+### Transaction Signing
+
+For high-value transactions, add a cryptographic signature to the workflow state:
+
+```python
+import hmac
+import hashlib
+
+def sign_transaction(state, context, **_):
+    """Add HMAC signature to transaction before sending to acquirer."""
+    signing_key = os.environ["TRANSACTION_SIGNING_KEY"].encode()
+    payload = f"{state.card_token}:{state.amount_cents}:{state.merchant_id}"
+    signature = hmac.new(signing_key, payload.encode(), hashlib.sha256).hexdigest()
+    return {"transaction_signature": signature}
+```
+
+### Device Authentication
+
+Edge devices authenticate to the control plane using device-specific API keys stored in `edge_devices.api_key`. For higher assurance, rotate device keys on every sync using a challenge-response pattern:
+
+```python
+def refresh_device_token(state, context, **_):
+    """Rotate device API key on each successful sync."""
+    new_key = secrets.token_urlsafe(32)
+    # Update in control plane DB + return to device
+    return {"new_api_key": new_key, "key_rotated_at": datetime.utcnow().isoformat()}
+```
+
+### PCI Audit Trail
+
+The `command_audit_log` table (cloud) and `workflow_audit_log` table (edge and cloud) together provide the audit trail required for PCI-DSS compliance. Every workflow event — start, step execution, compensation, completion, failure — is recorded with timestamp and step name.
+
+To query for a device's transaction audit trail:
+
+```sql
+SELECT w.id, w.workflow_type, w.status, a.event_type, a.step_name, a.timestamp
+FROM workflow_executions w
+JOIN workflow_audit_log a ON a.workflow_id = w.id
+WHERE w.owner_id = 'device-001'
+  AND w.created_at >= NOW() - INTERVAL '30 days'
+ORDER BY a.timestamp;
+```
+
+### Offline Floor Limit Pattern
+
+When the device has no network, approve transactions below the floor limit without cloud authorization:
+
+```python
+OFFLINE_FLOOR_LIMIT_CENTS = 5000  # $50
+
+def authorize_payment(state, context, **_):
+    """Authorize offline if below floor limit; route online otherwise."""
+    if state.amount_cents <= OFFLINE_FLOOR_LIMIT_CENTS and not context.network_available:
+        return {"authorized": True, "auth_mode": "OFFLINE_FLOOR"}
+    # Fall through to online authorization step
+    raise WorkflowJumpDirective(target_step="Online_Authorize")
+```
+
+This pattern is safe because Store-and-Forward will sync the transaction when connectivity returns, and the acquirer can dispute any offline approvals that fail fraud checks.
+
+---
+
+## Summary
+
+**Security Principles:**
+1. **Encrypt everything** (at rest and in transit)
+2. **Validate all input** (use Pydantic)
+3. **Never store secrets** in code
+4. **Log all security events** (audit trail)
+5. **Implement access control** (RBAC)
+6. **Regular security scanning** (dependencies, code)
+
+**For fintech applications:**
+- Set `RUVON_ENCRYPTION_KEY` before starting any server or worker
+- Never store PANs in workflow state — tokenize immediately and store the token
+- Use `workflow_audit_log` and `command_audit_log` for PCI-DSS compliance audit trail
+- Rotate device API keys on each sync for forward secrecy
+
+**For PCI-DSS compliance**, consult with a Qualified Security Assessor (QSA).

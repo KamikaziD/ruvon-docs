@@ -1,0 +1,133 @@
+site_name: Ruvon SDK
+site_description: Python-native workflow engine for fintech edge devices and cloud
+site_url: https://kamazid.github.io/ruvon-docs/
+repo_url: https://github.com/KamikaziD/ruvon-sdk
+repo_name: KamikaziD/ruvon-sdk
+edit_uri: ""
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.footer
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - content.code.annotate
+  logo: assets/logo.svg
+  favicon: assets/logo.svg
+
+extra:
+  version:
+    provider: mike
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/KamikaziD/ruvon-sdk
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/ruvon-sdk/
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/u/ruvondev
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Tutorials:
+    - Getting Started: tutorials/getting-started.md
+    - Build a Task Manager: tutorials/build-task-manager.md
+    - Parallel Execution: tutorials/parallel-execution.md
+    - Saga Pattern: tutorials/saga-pattern.md
+    - Edge Deployment: tutorials/edge-deployment.md
+  - How-To Guides:
+    - Installation: how-to-guides/installation.md
+    - Create a Workflow: how-to-guides/create-workflow.md
+    - Configuration: how-to-guides/configuration.md
+    - Decision Steps: how-to-guides/decision-steps.md
+    - HTTP Steps: how-to-guides/http-steps.md
+    - Human-in-the-Loop: how-to-guides/human-in-loop.md
+    - Saga Mode: how-to-guides/saga-mode.md
+    - Dashboard: how-to-guides/dashboard.md
+    - Deployment: how-to-guides/deployment.md
+    - Testing: how-to-guides/testing.md
+    - Troubleshooting: how-to-guides/troubleshooting.md
+  - Explanation:
+    - Architecture: explanation/architecture.md
+    - Workflow Lifecycle: explanation/workflow-lifecycle.md
+    - Provider Pattern: explanation/provider-pattern.md
+    - Edge Architecture: explanation/edge-architecture.md
+    - State Management: explanation/state-management.md
+    - Parallel Execution: explanation/parallel-execution.md
+    - Sub-Workflows: explanation/sub-workflows.md
+    - Saga Pattern: explanation/saga-pattern.md
+    - Workflow Versioning: explanation/workflow-versioning.md
+    - Zombie Recovery: explanation/zombie-recovery.md
+    - Performance: explanation/performance.md
+    - Design Decisions: explanation/design-decisions.md
+    - Self-Hosting: explanation/self-hosting.md
+  - Reference:
+    - API:
+      - Workflow: reference/api/workflow.md
+      - WorkflowBuilder: reference/api/workflow-builder.md
+      - Providers: reference/api/providers.md
+      - Step Context: reference/api/step-context.md
+      - Directives: reference/api/directives.md
+    - Configuration:
+      - Step Types: reference/configuration/step-types.md
+      - YAML Schema: reference/configuration/yaml-schema.md
+      - CLI Commands: reference/configuration/cli-commands.md
+      - Configuration: reference/configuration/configuration.md
+      - Database Schema: reference/configuration/database-schema.md
+      - Edge Footprint: reference/configuration/edge-footprint.md
+  - Advanced:
+    - Custom Providers: advanced/custom-providers.md
+    - Extending Ruvon: advanced/extending-ruvon.md
+    - Executor Portability: advanced/executor-portability.md
+    - Dynamic Injection: advanced/dynamic-injection.md
+    - Resource Management: advanced/resource-management.md
+    - Security: advanced/security.md
+  - Appendices:
+    - Changelog: appendices/changelog.md
+    - Roadmap: appendices/roadmap.md
+    - Contributing: appendices/contributing.md
+    - Glossary: appendices/glossary.md
+    - Migration Notes: appendices/migration-notes.md
