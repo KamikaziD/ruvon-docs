@@ -12,6 +12,35 @@ After **1.0.0**: the provider interfaces, YAML step schema, and `ruvon` CLI comm
 
 ---
 
+## Upgrading to 0.1.2
+
+**From:** 0.1.1
+
+### Changes required
+
+No breaking changes. Drop-in upgrade.
+
+```bash
+pip install --upgrade ruvon-sdk==0.1.2 ruvon-edge==0.1.2 ruvon-server==0.1.2
+```
+
+### Docker images
+
+```bash
+docker pull ruvondev/ruvon-server:0.1.2
+docker pull ruvondev/ruvon-worker:0.1.2
+docker pull ruvondev/ruvon-dashboard:0.1.2
+docker pull ruvondev/ruvon-edge-dev:0.1.2
+```
+
+Update your compose file image tags from `:0.1.1` → `:0.1.2`.
+
+### NATS users
+
+If you run the full NATS stack, `nats-init` bootstrap service is no longer needed — `ruvon-server` provisions all 7 JetStream streams at startup. Remove it from your compose file.
+
+---
+
 ## Upgrading to 0.1.1
 
 **From:** First public release — no prior version to migrate from.

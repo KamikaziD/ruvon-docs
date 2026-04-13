@@ -491,13 +491,13 @@ message_template: "Hello {{ recipient }}, your amount is {{ amount }}"
 **Solution:** (1) Update the version pin in all three Dockerfiles as part of the version bump step. (2) Always build with `--no-cache` after a version bump:
 
 ```bash
-docker build --no-cache -f docker/Dockerfile.ruvon-server-prod -t ruvondev/ruvon-server:0.1.1 .
+docker build --no-cache -f docker/Dockerfile.ruvon-server-prod -t ruvondev/ruvon-server:0.1.2 .
 ```
 
 **Verify:**
 
 ```bash
-docker run --rm ruvondev/ruvon-server:0.1.1 python -c "import ruvon; print(ruvon.__version__)"
+docker run --rm ruvondev/ruvon-server:0.1.2 python -c "import ruvon; print(ruvon.__version__)"
 # Must print the new version
 ```
 

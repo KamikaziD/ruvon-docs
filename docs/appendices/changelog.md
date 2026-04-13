@@ -7,6 +7,27 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ---
 
+## [0.1.2] — 2026-04-13
+
+### Fixed
+
+- **SQLite NOT NULL constraint** — Edge SQLite schema now correctly handles nullable columns; `process_saf_sync()` no longer raises `IntegrityError` on first sync after a cold start
+- **NATSBridge silent disable** — Server image now installs `nats-py` via the `[nats]` extra in `ruvon-server`; bridge no longer silently disabled due to missing import
+- **NATS stream bootstrap** — `ruvon-server` NATSBridge now provisions all 7 JetStream streams at startup (including `RUVON_NODE_PATCH` and `RUVON_MESH_BUILD`); no external bootstrap service required
+- **Dashboard realm config** — Fixed hardcoded `realms/rufus` → `realms/ruvon` in dashboard auth; login no longer fails with "Realm does not exist"
+- **Dashboard API URL env var** — Fixed `NEXT_PUBLIC_RUFUS_API_URL` → `NEXT_PUBLIC_RUVON_API_URL`; all API calls now use the correct base URL
+- **Dashboard login text** — Fixed `"RUFUS EDGE"` → `"Ruvon Edge"` in login page
+
+### Added
+
+- **`relay` extra for `ruvon-edge`** — `pip install 'ruvon-edge[relay]'` installs FastAPI + uvicorn for peer relay / mesh networking HTTP server (required when `PEER_LISTEN_PORT > 0`)
+
+### Changed
+
+- **Docker images** — `ruvondev/ruvon-{server,worker,flower,dashboard,edge-dev}:0.1.2` (multi-arch: `linux/amd64`, `linux/arm64`)
+
+---
+
 ## [0.1.1] — 2026-04-07
 
 Initial public release of the **Ruvon SDK** under the `ruvon-*` package names.

@@ -10,7 +10,7 @@ Ruvon ships as **three separate wheels**. Edge devices install only `ruvon-edge`
 which pulls in `ruvon-sdk` (core) but never installs the 10 MB cloud control plane.
 
 ```
-ruvon_sdk-0.1.1-py3-none-any.whl  (~2.5 MB)
+ruvon_sdk-0.1.2-py3-none-any.whl  (~2.5 MB)
 │
 ├── ruvon/                          1.9 MB  57 files  — Core SDK + all implementations
 │   ├── workflow.py                 (970 lines) — Workflow orchestrator

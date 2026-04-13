@@ -51,10 +51,10 @@ Ruvon lets you define workflows once in YAML and run them on POS terminals, ATMs
 ## Docker
 
 ```bash
-docker pull ruvondev/ruvon-server:0.1.1
-docker pull ruvondev/ruvon-worker:0.1.1
-docker pull ruvondev/ruvon-dashboard:0.1.1
-docker pull ruvondev/ruvon-edge-dev:0.1.1
+docker pull ruvondev/ruvon-server:0.1.2
+docker pull ruvondev/ruvon-worker:0.1.2
+docker pull ruvondev/ruvon-dashboard:0.1.2
+docker pull ruvondev/ruvon-edge-dev:0.1.2
 ```
 
 ## Quick Example

@@ -2,8 +2,8 @@
 
 Planned features and priorities for the Ruvon SDK.
 
-**Current stable version:** 0.1.1  
-**Last updated:** 2026-04-07
+**Current stable version:** 0.1.2  
+**Last updated:** 2026-04-13
 
 ---
 

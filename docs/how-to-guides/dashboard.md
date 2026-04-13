@@ -8,7 +8,7 @@ This guide covers deploying the Ruvon Dashboard, logging in, assigning roles, an
 
 - Docker Compose with the Ruvon stack running (`ruvon-server`, `ruvon-worker`, `postgres`, `redis`)
 - A Keycloak instance **or** any OIDC-compatible identity provider
-- The `ruvon-dashboard` Docker image (`ruvondev/ruvon-dashboard:0.1.1`)
+- The `ruvon-dashboard` Docker image (`ruvondev/ruvon-dashboard:0.1.2`)
 
 ---
 
@@ -18,7 +18,7 @@ Add the `ruvon-dashboard` service to your compose file:
 
 ```yaml
 ruvon-dashboard:
-  image: ruvondev/ruvon-dashboard:0.1.1
+  image: ruvondev/ruvon-dashboard:0.1.2
   ports: ["3000:3000"]
   environment:
     NEXT_PUBLIC_RUVON_API_URL: http://localhost:8000   # baked at build time
