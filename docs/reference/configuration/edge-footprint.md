@@ -31,7 +31,7 @@ ruvon_sdk-0.1.2-py3-none-any.whl  (~2.5 MB)
 │
 └── ruvon_cli/                      520 KB  12 files  — CLI tool
 
-ruvon_sdk_edge-0.6.0-py3-none-any.whl  (~250 KB)
+ruvon_edge-0.1.2-py3-none-any.whl  (~250 KB)
 │
 └── ruvon_edge/                     232 KB  8 files   — Edge agent
     ├── agent.py                    (465 lines) — RuvonEdgeAgent main class
@@ -42,7 +42,7 @@ ruvon_sdk_edge-0.6.0-py3-none-any.whl  (~250 KB)
     ├── delta_updates.py            (379 lines) — Config diff/patch logic
     └── payment_steps.py            (212 lines) — Reference payment step functions
 
-ruvon_sdk_server-0.6.0-py3-none-any.whl  (~10 MB)
+ruvon_server-0.1.2-py3-none-any.whl  (~10 MB)
 │
 └── ruvon_server/                   10 MB   42 files  — Cloud control plane
 ```
@@ -312,7 +312,5 @@ Option 3 — Use a virtual environment with stripped system Python for embedded 
 
 | Version | `ruvon-sdk` size | `ruvon-edge` size | `ruvon-server` size | Notes |
 |---------|:----------------:|:---------------------:|:-----------------------:|-------|
-| 0.6.0 | ~2.5 MB | ~250 KB | ~10 MB | Package split — edge devices no longer ship cloud code |
-| 0.5.4 | 9.3 MB (monolithic) | — | — | JavaScript step type removed |
-| 0.5.3 | ~9.3 MB (monolithic) | — | — | Added PARALLEL batch_size |
-| 0.5.0 | ~9.1 MB (monolithic) | — | — | Schema consolidation |
+| 0.1.2 | ~2.5 MB | ~250 KB | ~10 MB | psycopg2-binary baked in; NATS stream bootstrap; relay extra |
+| 0.1.1 | ~2.5 MB | ~250 KB | ~10 MB | Initial public release — package split from monolith |
