@@ -125,6 +125,7 @@ nav:
     - Dynamic Injection: advanced/dynamic-injection.md
     - Resource Management: advanced/resource-management.md
     - Security: advanced/security.md
+    - Swarm Studio 3D: advanced/swarm-studio.md
   - Appendices:
     - Changelog: appendices/changelog.md
     - Roadmap: appendices/roadmap.md
