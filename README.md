@@ -2,7 +2,7 @@
 
 Official documentation for the [Ruvon SDK](https://github.com/KamikaziD/ruvon-sdk) — Python-native workflow engine for fintech edge devices and cloud.
 
-**Live docs:** https://kamazid.github.io/ruvon-docs/
+**Live docs:** https://kamikazid.github.io/ruvon-docs/
 
 ## Local development
 
